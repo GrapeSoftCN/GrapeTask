@@ -28,7 +28,6 @@ public class taskModel {
 
 	public taskModel() {
 		form.putRule("name", formdef.notNull);
-		// form.putRule("ogid", formdef.notNull);
 		form.putRule("timediff", formdef.notNull);
 	}
 
@@ -36,11 +35,13 @@ public class taskModel {
 		if (!form.checkRuleEx(Info)) {
 			return 1;
 		}
-		return dbtask.data(Info).insertOnce() != null ? 0 : 99;
+		JSONObject object = getInt(Info);
+		return dbtask.data(object).insertOnce() != null ? 0 : 99;
 	}
 
 	public int update(String id, JSONObject Info) {
-		return dbtask.eq("_id", new ObjectId(id)).data(Info).update() != null ? 0 : 99;
+		JSONObject object = getInt(Info);
+		return dbtask.eq("_id", new ObjectId(id)).data(object).update() != null ? 0 : 99;
 	}
 
 	public int delete(String id) {
@@ -48,8 +49,13 @@ public class taskModel {
 	}
 
 	public int delete(String[] ids) {
+//		int dplv=0;
 		dbtask = (DBHelper) dbtask.or();
 		for (int i = 0, len = ids.length; i < len; i++) {
+//			dplv = Integer.parseInt(getPLV(mids[i]).get("dplv").toString());
+//			if (userplv<dplv) {
+//				continue;
+//			}
 			dbtask.eq("_id", new ObjectId(ids[i]));
 		}
 		return dbtask.delete() != null ? 0 : 99;
@@ -61,10 +67,13 @@ public class taskModel {
 		}
 		return dbtask.limit(30).select();
 	}
+	public JSONObject find(String taskid) {
+		return dbtask.eq("_id", new ObjectId(taskid)).find();
+	}
 
 	@SuppressWarnings("unchecked")
 	public JSONObject page(int ids, int pageSize) {
-		JSONArray array = dbtask.limit(20).page(ids, pageSize);
+		JSONArray array = dbtask.page(ids, pageSize);
 		JSONObject object = new JSONObject();
 		object.put("totalSize", (int) Math.ceil((double) dbtask.count() / pageSize));
 		object.put("currentPage", ids);
@@ -78,7 +87,7 @@ public class taskModel {
 		for (Object object2 : info.keySet()) {
 			dbtask.eq(object2.toString(), info.get(object2.toString()));
 		}
-		JSONArray array = dbtask.limit(20).page(ids, pageSize);
+		JSONArray array = dbtask.page(ids, pageSize);
 		JSONObject object = new JSONObject();
 		object.put("totalSize", (int) Math.ceil((double) dbtask.count() / pageSize));
 		object.put("currentPage", ids);
@@ -94,7 +103,7 @@ public class taskModel {
 		String info = session.get(username).toString();
 		String ownid = JSONHelper.string2json(info).get("ownid").toString();
 		JSONArray array = dbtask.eq("ownid", ownid).limit(20).select();
-		JSONArray arrays = null;
+		JSONArray arrays = new JSONArray();
 		String currentTime = String.valueOf(TimeHelper.nowMillis());
 		for (int i = 0, len = array.size(); i < len; i++) {
 			JSONObject object = (JSONObject) array.get(i);
@@ -110,6 +119,17 @@ public class taskModel {
 		return arrays;
 	}
 
+	@SuppressWarnings("unchecked")
+	public JSONObject getInt(JSONObject object) {
+		int value;
+		for (Object object2 : object.keySet()) {
+			if (object.get(object2.toString()) instanceof Long) {
+				value = Integer.parseInt(String.valueOf(object.get(object2.toString())));
+				object.put(object2.toString(), value);
+			}
+		}
+		return object;
+	}
 	public String getID() {
 		String str = UUID.randomUUID().toString();
 		return str.replace("-", "");
@@ -144,6 +164,15 @@ public class taskModel {
 			break;
 		case 1:
 			msg = "必填项没有填";
+			break;
+		case 2:
+			msg = "没有创建数据权限，请联系管理员进行权限调整";
+			break;
+		case 3:
+			msg = "没有修改数据权限，请联系管理员进行权限调整";
+			break;
+		case 4:
+			msg = "没有删除数据权限，请联系管理员进行权限调整";
 			break;
 		default:
 			msg = "其它异常";
