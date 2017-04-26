@@ -10,7 +10,9 @@ public class TestTask {
 //		long end = Long.parseLong("1493177707000");
 //		System.out.println((int)Math.ceil((double)(end-start)/(1000*60*60*24)));
 		
-		String info = "{\"name\":\"测试任务\",\"timediff\":3,\"type\":1}";
-		System.out.println(new task().TaskAdd(info));
+//		String info = "{\"name\":\"测试任务\",\"timediff\":3,\"type\":1}";
+//		System.out.println(new task().TaskAdd(info));
+		
+		System.out.println(new task().TaskPage(1, 2));
 	}
 }

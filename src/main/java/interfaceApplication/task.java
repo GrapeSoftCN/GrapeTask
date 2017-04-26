@@ -27,13 +27,15 @@ public class task {
 		map.put("priority", 0);  //任务优先级  
 	}
 
+	@SuppressWarnings("unchecked")
 	public String TaskAdd(String info) {
 //		String code = execRequest._run("GrapeAuth/Auth/InsertPLV", null).toString();
 //		if (!"0".equals(code)) {
 //			return model.resultMessage(2, "");
 //		}
 		JSONObject object = model.AddMap(map, JSONHelper.string2json(info));
-		return model.resultMessage(model.Add(object), "任务新增成功");
+		_obj.put("records", JSONHelper.string2json(model.Add(object)));
+		return model.resultMessage(0, _obj.toString());
 	}
 
 	public String TaskUpdate(String id, String info) {

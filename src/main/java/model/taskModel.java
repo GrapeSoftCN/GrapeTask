@@ -31,17 +31,17 @@ public class taskModel {
 		form.putRule("timediff", formdef.notNull);
 	}
 
-	public int Add(JSONObject Info) {
+	public String Add(JSONObject Info) {
 		if (!form.checkRuleEx(Info)) {
-			return 1;
+			return resultMessage(1, "必填项为空");
 		}
-		JSONObject object = getInt(Info);
-		return dbtask.data(object).insertOnce() != null ? 0 : 99;
+		String tips = dbtask.data(Info).insertOnce().toString();
+		return find(tips).toString();
 	}
 
 	public int update(String id, JSONObject Info) {
-		JSONObject object = getInt(Info);
-		return dbtask.eq("_id", new ObjectId(id)).data(object).update() != null ? 0 : 99;
+//		JSONObject object = getInt(Info);
+		return dbtask.eq("_id", new ObjectId(id)).data(Info).update() != null ? 0 : 99;
 	}
 
 	public int delete(String id) {
@@ -119,17 +119,17 @@ public class taskModel {
 		return arrays;
 	}
 
-	@SuppressWarnings("unchecked")
-	public JSONObject getInt(JSONObject object) {
-		int value;
-		for (Object object2 : object.keySet()) {
-			if (object.get(object2.toString()) instanceof Long) {
-				value = Integer.parseInt(String.valueOf(object.get(object2.toString())));
-				object.put(object2.toString(), value);
-			}
-		}
-		return object;
-	}
+//	@SuppressWarnings("unchecked")
+//	public JSONObject getInt(JSONObject object) {
+//		int value;
+//		for (Object object2 : object.keySet()) {
+//			if (object.get(object2.toString()) instanceof Long) {
+//				value = Integer.parseInt(String.valueOf(object.get(object2.toString())));
+//				object.put(object2.toString(), value);
+//			}
+//		}
+//		return object;
+//	}
 	public String getID() {
 		String str = UUID.randomUUID().toString();
 		return str.replace("-", "");
