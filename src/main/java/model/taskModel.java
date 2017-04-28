@@ -50,7 +50,7 @@ public class taskModel {
 
 	public int delete(String[] ids) {
 //		int dplv=0;
-		dbtask = (DBHelper) dbtask.or();
+		dbtask.or();
 		for (int i = 0, len = ids.length; i < len; i++) {
 //			dplv = Integer.parseInt(getPLV(mids[i]).get("dplv").toString());
 //			if (userplv<dplv) {
@@ -58,12 +58,12 @@ public class taskModel {
 //			}
 			dbtask.eq("_id", new ObjectId(ids[i]));
 		}
-		return dbtask.delete() != null ? 0 : 99;
+		return dbtask.deleteAll() != ids.length ? 0 : 99;
 	}
 
 	public JSONArray find(JSONObject info) {
 		for (Object object2 : info.keySet()) {
-			dbtask.eq(object2.toString(), info.get(object2.toString()));
+			dbtask.like(object2.toString(), info.get(object2.toString()));
 		}
 		return dbtask.limit(30).select();
 	}
