@@ -58,7 +58,7 @@ public class taskModel {
 //			}
 			dbtask.eq("_id", new ObjectId(ids[i]));
 		}
-		return dbtask.deleteAll() != ids.length ? 0 : 99;
+		return dbtask.deleteAll() == ids.length ? 0 : 99;
 	}
 
 	public JSONArray find(JSONObject info) {
