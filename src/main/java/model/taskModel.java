@@ -3,7 +3,6 @@ package model;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.bson.types.ObjectId;
@@ -21,6 +20,8 @@ import session.session;
 public class taskModel {
 	private static DBHelper dbtask;
 	private static formHelper form;
+	private JSONObject _obj = new JSONObject();
+
 	static {
 		dbtask = new DBHelper("mongodb", "task");
 		form = dbtask.getChecker();
@@ -40,8 +41,8 @@ public class taskModel {
 	}
 
 	public int update(String id, JSONObject Info) {
-//		JSONObject object = getInt(Info);
-		return dbtask.eq("_id", new ObjectId(id)).data(Info).update() != null ? 0 : 99;
+		return dbtask.eq("_id", new ObjectId(id)).data(Info).update() != null
+				? 0 : 99;
 	}
 
 	public int delete(String id) {
@@ -49,13 +50,8 @@ public class taskModel {
 	}
 
 	public int delete(String[] ids) {
-//		int dplv=0;
 		dbtask.or();
 		for (int i = 0, len = ids.length; i < len; i++) {
-//			dplv = Integer.parseInt(getPLV(mids[i]).get("dplv").toString());
-//			if (userplv<dplv) {
-//				continue;
-//			}
 			dbtask.eq("_id", new ObjectId(ids[i]));
 		}
 		return dbtask.deleteAll() == ids.length ? 0 : 99;
@@ -67,6 +63,7 @@ public class taskModel {
 		}
 		return dbtask.limit(30).select();
 	}
+
 	public JSONObject find(String taskid) {
 		return dbtask.eq("_id", new ObjectId(taskid)).find();
 	}
@@ -75,7 +72,8 @@ public class taskModel {
 	public JSONObject page(int ids, int pageSize) {
 		JSONArray array = dbtask.page(ids, pageSize);
 		JSONObject object = new JSONObject();
-		object.put("totalSize", (int) Math.ceil((double) dbtask.count() / pageSize));
+		object.put("totalSize",
+				(int) Math.ceil((double) dbtask.count() / pageSize));
 		object.put("currentPage", ids);
 		object.put("pageSize", pageSize);
 		object.put("data", array);
@@ -89,7 +87,8 @@ public class taskModel {
 		}
 		JSONArray array = dbtask.page(ids, pageSize);
 		JSONObject object = new JSONObject();
-		object.put("totalSize", (int) Math.ceil((double) dbtask.count() / pageSize));
+		object.put("totalSize",
+				(int) Math.ceil((double) dbtask.count() / pageSize));
 		object.put("currentPage", ids);
 		object.put("pageSize", pageSize);
 		object.put("data", array);
@@ -108,8 +107,8 @@ public class taskModel {
 		for (int i = 0, len = array.size(); i < len; i++) {
 			JSONObject object = (JSONObject) array.get(i);
 			String lasttime = object.get("lasttime").toString();
-			int diff = (int) Math
-					.ceil((double) (Long.parseLong(currentTime) - Long.parseLong(lasttime)) / (1000 * 60 * 60 * 24));
+			int diff = (int) Math.ceil((double) (Long.parseLong(currentTime)
+					- Long.parseLong(lasttime)) / (1000 * 60 * 60 * 24));
 			int timediff = Integer.parseInt(object.get("timediff").toString());
 			if (diff <= timediff) {
 				continue;
@@ -117,22 +116,6 @@ public class taskModel {
 			arrays.add(object);
 		}
 		return arrays;
-	}
-
-//	@SuppressWarnings("unchecked")
-//	public JSONObject getInt(JSONObject object) {
-//		int value;
-//		for (Object object2 : object.keySet()) {
-//			if (object.get(object2.toString()) instanceof Long) {
-//				value = Integer.parseInt(String.valueOf(object.get(object2.toString())));
-//				object.put(object2.toString(), value);
-//			}
-//		}
-//		return object;
-//	}
-	public String getID() {
-		String str = UUID.randomUUID().toString();
-		return str.replace("-", "");
 	}
 
 	/**
@@ -145,9 +128,11 @@ public class taskModel {
 	@SuppressWarnings("unchecked")
 	public JSONObject AddMap(HashMap<String, Object> map, JSONObject object) {
 		if (map.entrySet() != null) {
-			Iterator<Entry<String, Object>> iterator = map.entrySet().iterator();
+			Iterator<Entry<String, Object>> iterator = map.entrySet()
+					.iterator();
 			while (iterator.hasNext()) {
-				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) iterator.next();
+				Map.Entry<String, Object> entry = (Map.Entry<String, Object>) iterator
+						.next();
 				if (!object.containsKey(entry.getKey())) {
 					object.put(entry.getKey(), entry.getValue());
 				}
@@ -156,6 +141,16 @@ public class taskModel {
 		return object;
 	}
 
+	@SuppressWarnings("unchecked")
+	public String resultMessage(JSONObject object) {
+		_obj.put("records", object);
+		return resultMessage(0, _obj.toString());
+	}
+	@SuppressWarnings("unchecked")
+	public String resultMessage(JSONArray array) {
+		_obj.put("records", array);
+		return resultMessage(0, _obj.toString());
+	}
 	public String resultMessage(int num, String message) {
 		String msg = "";
 		switch (num) {
