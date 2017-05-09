@@ -15,7 +15,7 @@ public class task {
 	private String userid;
 
 	public task() {
-		userid = execRequest.getChannelValue("Userid").toString();
+//		userid = execRequest.getChannelValue("Userid").toString();
 
 		map.put("timediff", 3); // 更新时间周期，单位为天
 		map.put("lasttime", String.valueOf(TimeHelper.nowMillis()));
@@ -26,37 +26,37 @@ public class task {
 	}
 
 	public String TaskAdd(String info) {
-		String tip = execRequest
-				._run("GrapeAuth/Auth/InsertPLV/s:" + userid, null).toString();
-		if (!"0".equals(tip)) {
-			return model.resultMessage(2, "");
-		}
+//		String tip = execRequest
+//				._run("GrapeAuth/Auth/InsertPLV/s:" + userid, null).toString();
+//		if (!"0".equals(tip)) {
+//			return model.resultMessage(2, "");
+//		}
 		JSONObject object = model.AddMap(map, JSONHelper.string2json(info));
 		return model.resultMessage(JSONHelper.string2json(model.Add(object)));
 	}
 
 	public String TaskUpdate(String id, String info) {
-		String uPLV = model.find(id).get("uplv").toString();
-		String tip = execRequest
-				._run("GrapeAuth/Auth/UpdatePLV/s:" + uPLV + "/s:" + userid,
-						null)
-				.toString();
-		if (!"0".equals(tip)) {
-			return model.resultMessage(3, "没有编辑权限");
-		}
+//		String uPLV = model.find(id).get("uplv").toString();
+//		String tip = execRequest
+//				._run("GrapeAuth/Auth/UpdatePLV/s:" + uPLV + "/s:" + userid,
+//						null)
+//				.toString();
+//		if (!"0".equals(tip)) {
+//			return model.resultMessage(3, "没有编辑权限");
+//		}
 		return model.resultMessage(
 				model.update(id, JSONHelper.string2json(info)), "任务修改成功");
 	}
 
 	public String TaskDelete(String id) {
-		String dPLV = model.find(id).get("dplv").toString();
-		String tip = execRequest
-				._run("GrapeAuth/Auth/DeletePLV/s:" + dPLV + "/s:" + userid,
-						null)
-				.toString();
-		if (!"0".equals(tip)) {
-			return model.resultMessage(3, "没有编辑权限");
-		}
+//		String dPLV = model.find(id).get("dplv").toString();
+//		String tip = execRequest
+//				._run("GrapeAuth/Auth/DeletePLV/s:" + dPLV + "/s:" + userid,
+//						null)
+//				.toString();
+//		if (!"0".equals(tip)) {
+//			return model.resultMessage(3, "没有编辑权限");
+//		}
 		return model.resultMessage(model.delete(id), "任务删除成功");
 	}
 
