@@ -7,12 +7,11 @@ import org.json.simple.JSONObject;
 import esayhelper.JSONHelper;
 import esayhelper.TimeHelper;
 import model.taskModel;
-import rpc.execRequest;
 
 public class task {
 	private taskModel model = new taskModel();
 	private HashMap<String, Object> map = new HashMap<>();
-	private String userid;
+//	private String userid;
 
 	public task() {
 //		userid = execRequest.getChannelValue("Userid").toString();

@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import apps.appsProxy;
 import esayhelper.DBHelper;
 import esayhelper.JSONHelper;
 import esayhelper.TimeHelper;
@@ -23,6 +24,8 @@ public class taskModel {
 	private JSONObject _obj = new JSONObject();
 
 	static {
+//		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(),
+//				"task");
 		dbtask = new DBHelper("mongodb", "task");
 		form = dbtask.getChecker();
 	}
@@ -83,9 +86,12 @@ public class taskModel {
 	@SuppressWarnings("unchecked")
 	public JSONObject page(int ids, int pageSize, JSONObject info) {
 		for (Object object2 : info.keySet()) {
+			if ("_id".equals(object2.toString())) {
+				dbtask.eq("_id", new ObjectId(info.get("_id").toString()));
+			}
 			dbtask.eq(object2.toString(), info.get(object2.toString()));
 		}
-		JSONArray array = dbtask.page(ids, pageSize);
+		JSONArray array = dbtask.dirty().page(ids, pageSize);
 		JSONObject object = new JSONObject();
 		object.put("totalSize",
 				(int) Math.ceil((double) dbtask.count() / pageSize));
@@ -146,11 +152,13 @@ public class taskModel {
 		_obj.put("records", object);
 		return resultMessage(0, _obj.toString());
 	}
+
 	@SuppressWarnings("unchecked")
 	public String resultMessage(JSONArray array) {
 		_obj.put("records", array);
 		return resultMessage(0, _obj.toString());
 	}
+
 	public String resultMessage(int num, String message) {
 		String msg = "";
 		switch (num) {

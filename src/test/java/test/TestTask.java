@@ -1,6 +1,7 @@
 package test;
 
 import esayhelper.TimeHelper;
+import httpServer.booter;
 import interfaceApplication.task;
 
 public class TestTask {
@@ -13,6 +14,13 @@ public class TestTask {
 //		String info = "{\"name\":\"测试任务\",\"timediff\":3,\"type\":1}";
 //		System.out.println(new task().TaskAdd(info));
 		
-		System.out.println(new task().TaskPage(1, 2));
+//		System.out.println(new task().TaskPage(1, 2));
+		 booter booter = new booter();
+		 try {
+		 System.out.println("GrapeTask!");
+		 System.setProperty("AppName", "GrapeTask");
+		 booter.start(1003);
+		} catch (Exception e) {
+		}
 	}
 }
