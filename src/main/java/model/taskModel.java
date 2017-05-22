@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import apps.appsProxy;
+import database.db;
 import esayhelper.DBHelper;
 import esayhelper.JSONHelper;
 import esayhelper.TimeHelper;
@@ -24,12 +25,16 @@ public class taskModel {
 	private JSONObject _obj = new JSONObject();
 
 	static {
-//		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(),
-//				"task");
-		dbtask = new DBHelper("mongodb", "task");
+		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(),
+				"task");
+//		dbtask = new DBHelper("mongodb", "task");
 		form = dbtask.getChecker();
 	}
 
+	private db bind(){
+		return dbtask.bind(String.valueOf(appsProxy.appid()));
+	}
+	
 	public taskModel() {
 		form.putRule("name", formdef.notNull);
 		form.putRule("timediff", formdef.notNull);
@@ -39,44 +44,44 @@ public class taskModel {
 		if (!form.checkRuleEx(Info)) {
 			return resultMessage(1, "必填项为空");
 		}
-		String tips = dbtask.data(Info).insertOnce().toString();
+		String tips = bind().data(Info).insertOnce().toString();
 		return find(tips).toString();
 	}
 
 	public int update(String id, JSONObject Info) {
-		return dbtask.eq("_id", new ObjectId(id)).data(Info).update() != null
+		return bind().eq("_id", new ObjectId(id)).data(Info).update() != null
 				? 0 : 99;
 	}
 
 	public int delete(String id) {
-		return dbtask.eq("_id", new ObjectId(id)).delete() != null ? 0 : 99;
+		return bind().eq("_id", new ObjectId(id)).delete() != null ? 0 : 99;
 	}
 
 	public int delete(String[] ids) {
-		dbtask.or();
+		bind().or();
 		for (int i = 0, len = ids.length; i < len; i++) {
-			dbtask.eq("_id", new ObjectId(ids[i]));
+			bind().eq("_id", new ObjectId(ids[i]));
 		}
-		return dbtask.deleteAll() == ids.length ? 0 : 99;
+		return bind().deleteAll() == ids.length ? 0 : 99;
 	}
 
 	public JSONArray find(JSONObject info) {
 		for (Object object2 : info.keySet()) {
-			dbtask.like(object2.toString(), info.get(object2.toString()));
+			bind().like(object2.toString(), info.get(object2.toString()));
 		}
-		return dbtask.limit(30).select();
+		return bind().limit(30).select();
 	}
 
 	public JSONObject find(String taskid) {
-		return dbtask.eq("_id", new ObjectId(taskid)).find();
+		return bind().eq("_id", new ObjectId(taskid)).find();
 	}
 
 	@SuppressWarnings("unchecked")
 	public JSONObject page(int ids, int pageSize) {
-		JSONArray array = dbtask.page(ids, pageSize);
+		JSONArray array = bind().page(ids, pageSize);
 		JSONObject object = new JSONObject();
 		object.put("totalSize",
-				(int) Math.ceil((double) dbtask.count() / pageSize));
+				(int) Math.ceil((double) bind().count() / pageSize));
 		object.put("currentPage", ids);
 		object.put("pageSize", pageSize);
 		object.put("data", array);
@@ -87,14 +92,14 @@ public class taskModel {
 	public JSONObject page(int ids, int pageSize, JSONObject info) {
 		for (Object object2 : info.keySet()) {
 			if ("_id".equals(object2.toString())) {
-				dbtask.eq("_id", new ObjectId(info.get("_id").toString()));
+				bind().eq("_id", new ObjectId(info.get("_id").toString()));
 			}
-			dbtask.eq(object2.toString(), info.get(object2.toString()));
+			bind().eq(object2.toString(), info.get(object2.toString()));
 		}
-		JSONArray array = dbtask.dirty().page(ids, pageSize);
+		JSONArray array = bind().dirty().page(ids, pageSize);
 		JSONObject object = new JSONObject();
 		object.put("totalSize",
-				(int) Math.ceil((double) dbtask.count() / pageSize));
+				(int) Math.ceil((double) bind().count() / pageSize));
 		object.put("currentPage", ids);
 		object.put("pageSize", pageSize);
 		object.put("data", array);
@@ -107,7 +112,7 @@ public class taskModel {
 		session session = new session();
 		String info = session.get(username).toString();
 		String ownid = JSONHelper.string2json(info).get("ownid").toString();
-		JSONArray array = dbtask.eq("ownid", ownid).limit(20).select();
+		JSONArray array = bind().eq("ownid", ownid).limit(20).select();
 		JSONArray arrays = new JSONArray();
 		String currentTime = String.valueOf(TimeHelper.nowMillis());
 		for (int i = 0, len = array.size(); i < len; i++) {
