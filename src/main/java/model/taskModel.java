@@ -9,21 +9,23 @@ import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import JGrapeSystem.jGrapeFW_Message;
 import apps.appsProxy;
 import check.formHelper;
 import check.formHelper.formdef;
 import database.DBHelper;
 import database.db;
-import esayhelper.JSONHelper;
-import esayhelper.TimeHelper;
-import esayhelper.jGrapeFW_Message;
 import nlogger.nlogger;
+import rpc.execRequest;
 import session.session;
+import time.TimeHelper;
 
 public class taskModel {
 	private static DBHelper dbtask;
 	private static formHelper form;
 	private JSONObject _obj = new JSONObject();
+	private JSONObject UserInfo = null;
+	private session session = new session();
 
 	static {
 		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(), "task");
@@ -38,6 +40,10 @@ public class taskModel {
 	public taskModel() {
 		form.putRule("name", formdef.notNull);
 		form.putRule("timediff", formdef.notNull);
+		String sid = (String) execRequest.getChannelValue("sid");
+		if (sid != null) {
+			UserInfo = session.getSession(sid);
+		}
 	}
 
 	public String Add(JSONObject Info) {
@@ -162,17 +168,20 @@ public class taskModel {
 				object.put("data", array);
 			} catch (Exception e) {
 				object = null;
+			}finally {
+				bind().clear();
 			}
 		}
 		return resultMessage(object);
 	}
 
 	@SuppressWarnings("unchecked")
-	public String notice(String username) {
-		// 获取当前登录用户
-		session session = new session();
-		String info = session.get(username).toString();
-		String ownid = JSONHelper.string2json(info).get("ownid").toString();
+	public String notice() {
+		if (UserInfo == null) {
+			return null;
+		}
+		// 获取当前登录用户信息
+		String ownid = UserInfo.getString("ownid");
 		JSONArray array = bind().eq("ownid", ownid).limit(20).select();
 		JSONArray arrays = new JSONArray();
 		String currentTime = String.valueOf(TimeHelper.nowMillis());
