@@ -20,18 +20,18 @@ import string.StringHelper;
 import time.TimeHelper;
 
 public class task {
-	private static session se;
+	private session se;
 	private JSONObject UserInfo = null;
 	private String sid = null;
 	private static boolean initThread;
 	private Timer timer = new Timer();
 
 	static {
-		se = new session();
 		initThread = false;
 	}
 
 	public task() {
+		se = new session();
 		sid = (String) execRequest.getChannelValue("sid");
 
 		if (sid != null) {

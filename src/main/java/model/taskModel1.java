@@ -16,16 +16,13 @@ import json.JSONHelper;
 import rpc.execRequest;
 
 public class taskModel1 {
-	private static userDBHelper task;
-	private static formHelper form;
+	private userDBHelper task;
+	private formHelper form;
 
-	static {
+	public taskModel1() {
 		String sid = (String) execRequest.getChannelValue("sid");
 		task = new userDBHelper("task", sid);
 		form = task.getChecker();
-	}
-
-	public taskModel1() {
 		form.putRule("content", formdef.notNull);
 	}
 

@@ -21,23 +21,19 @@ import session.session;
 import time.TimeHelper;
 
 public class taskModel {
-	private static DBHelper dbtask;
-	private static formHelper form;
+	private DBHelper dbtask;
+	private formHelper form;
 	private JSONObject _obj = new JSONObject();
 	private JSONObject UserInfo = null;
 	private session session = new session();
-
-	static {
-		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(), "task");
-		// dbtask = new DBHelper("mongodb", "task");
-		form = dbtask.getChecker();
-	}
 
 	private db bind() {
 		return dbtask.bind(String.valueOf(appsProxy.appid()));
 	}
 
 	public taskModel() {
+		dbtask = new DBHelper(appsProxy.configValue().get("db").toString(), "task");
+		form = dbtask.getChecker();
 		form.putRule("name", formdef.notNull);
 		form.putRule("timediff", formdef.notNull);
 		String sid = (String) execRequest.getChannelValue("sid");
