@@ -8,13 +8,11 @@ import json.JSONHelper;
 import model.taskModel;
 import time.TimeHelper;
 
-public class tasks {
+public class task3 {
 	private taskModel model = new taskModel();
 	private HashMap<String, Object> map = new HashMap<>();
-	// private String userid;
 
-	public tasks() {
-		// userid = execRequest.getChannelValue("Userid").toString();
+	public task3() {
 
 		map.put("timediff", 3); // 更新时间周期，单位为天
 		map.put("lasttime", String.valueOf(TimeHelper.nowMillis()));
@@ -53,4 +51,5 @@ public class tasks {
 	public String TaskNotice() {
 		return model.notice();
 	}
+	
 }
