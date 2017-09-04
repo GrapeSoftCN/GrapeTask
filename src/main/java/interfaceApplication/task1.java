@@ -97,8 +97,7 @@ public class task1 {
 		String condString = "[{\"field\":\"ownid\",\"logic\":\"like\",\"value\":\"" + ownid
 				+ "\"},{\"field\":\"wbid\",\"logic\":\"like\",\"value\":\"" + wbid + "\"}]";
 		// 获取栏目
-		String column = appsProxy
-				.proxyCall("/GrapeContent/ContentGroup/getColumnId/" + condString, null, null)
+		String column = appsProxy.proxyCall("/GrapeContent/ContentGroup/getColumnId/" + condString, null, null)
 				.toString();
 		JSONArray array = JSONArray.toJSONArray(column);
 		JSONObject obj = getColumn(array);
@@ -121,7 +120,13 @@ public class task1 {
 			timediff = object.getLong("timediff");
 		}
 		lastTime = currentTime - timediff;
-		String info = appsProxy.proxyCall("/GrapeContent/ContentGroup/getUpdateColumn/"+lastTime+"/"+currentTime+"/"+timediff, null, null).toString();
+		 String info =
+		 appsProxy.proxyCall("/GrapeContent/ContentGroup/getUpdateColumn/"+lastTime+"/"+currentTime+"/"+timediff,
+		 null, null).toString();
+//		String info = appsProxy
+//				.proxyCall(
+//						"/GrapeContent/ContentGroup/getUpdateColumn/" + lastTime + "/" + currentTime + "/" + timediff)
+//				.toString();
 		return info;
 	}
 
@@ -240,7 +245,7 @@ public class task1 {
 		long time = 0;
 		long currentTime = TimeHelper.nowMillis();
 		// 获取该栏目下的最新的文章及栏目管理员的信息[手机号，邮箱....]
-		String temp = (String) appsProxy.proxyCall("/GrapeContent/Content/FindNewByOgid/" + ogid, null, null);
+		String temp = (String) appsProxy.proxyCall("/GrapeContent/Content/FindNewByOgid/" + ogid,null,null);
 		obj = JSONObject.toJSON(temp);
 		if (obj != null) {
 			time = obj.getLong("time");

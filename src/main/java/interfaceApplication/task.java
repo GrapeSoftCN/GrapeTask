@@ -28,6 +28,7 @@ public class task {
 		se = new session();
 		sid = (String) execRequest.getChannelValue("sid");
 		if (sid != null) {
+			// userInfo = (JSONObject) se.get(sid);
 			userInfo = se.getSession(sid);
 		}
 	}
@@ -67,10 +68,12 @@ public class task {
 	 */
 	@SuppressWarnings("unchecked")
 	public String CheckLink(int idx, int pageSize) {
+		nlogger.logout("Link");
 		int count = 0;
-		JSONObject object,objId, obj = new JSONObject();
-		String content,id;
-		JSONArray array = getColumnByType(idx,pageSize);
+		JSONObject object, objId, obj = new JSONObject();
+		String content, id;
+		JSONArray array = getColumnByType(idx, pageSize);
+		nlogger.logout(array);
 		JSONArray arrays = new JSONArray();
 		if (array != null && array.size() != 0) {
 			int l = array.size();
@@ -130,6 +133,26 @@ public class task {
 		return RestTime(array);
 	}
 
+	//获取最新咨询及举报
+	@SuppressWarnings("unchecked")
+	public JSONArray GetLetter(String sid) {
+		JSONObject obj;
+		String id;
+		JSONObject users = se.getSession(sid);
+		id = (users != null && users.size() != 0)
+				? ((JSONObject) users.get("_id")).getString("$oid") : " ";
+		db Sugdb = new DBHelper("mongodb","suggest").bind(appsProxy.appidString());
+		db Repdb = new DBHelper("mongodb","report").bind(appsProxy.appidString());
+		JSONArray SuggestArray = Sugdb.desc("time").eq("userid", id).limit(50).select();
+		JSONArray ReportArray = Repdb.desc("time").eq("userid", id).limit(50).select();
+		for (Object object : ReportArray) {
+			obj = (JSONObject) object;
+			SuggestArray.add(obj);
+		}
+		return SuggestArray;
+	}
+	
+	
 	/**
 	 * 获取剩余更新时间
 	 * 
@@ -260,7 +283,7 @@ public class task {
 				count = db.gte("time", lastTime).lte("time", currentTime).eq("ogid", columnId).count();
 				rest = num - count;
 				tempObj.put("restArticle", rest < 0 ? 0 : rest);
-				tempObj.put("id", columnId); //栏目id
+				tempObj.put("id", columnId); // 栏目id
 				tempObj.remove("lastTime");
 				tempObj.remove("editCount");
 				tempObj.remove("timediff");
@@ -287,6 +310,7 @@ public class task {
 			try {
 				privilige privil = new privilige(sid);
 				int roleplv = privil.getRolePV(appid);
+				// int roleplv = 0;
 				if (roleplv >= 1000 && roleplv < 3000) {
 					roleSign = 1; // 普通用户即企业员工
 				}
@@ -353,23 +377,31 @@ public class task {
 	 * 
 	 *
 	 */
-	private JSONArray getColumnByType(int idx,int pageSize) {
-		String temp, id, ogid = "";
-		JSONObject object;
+	@SuppressWarnings("unchecked")
+	private JSONArray getColumnByType(int idx, int pageSize) {
+		String id, ogid = "", Column = "";
+		JSONObject object, rs = new JSONObject();
 		JSONArray array = null;
-		temp = appsProxy.proxyCall("/GrapeContent/ContentGroup/FindByType/5/int:50").toString();
-		object = (JSONObject) JSONObject.toJSON(temp).get("message");
-		if (object != null && object.size() != 0) {
-			temp = object.getString("records");
-		}
-		JSONArray columns = JSONArray.toJSONArray(temp);
-		int l = columns.size();
-		if (l > 0) {
-			for (int i = 0; i < l; i++) {
-				object = (JSONObject) columns.get(i);
-				object = (JSONObject) object.get("_id");
-				id = object.getString("$oid");
-				ogid = id + ",";
+		// temp =
+		// appsProxy.proxyCall("/GrapeContent/ContentGroup/FindByTypes/5/int:50",null,null).toString();
+		// object = (JSONObject) JSONObject.toJSON(temp).get("message");
+		// if (object != null && object.size() != 0) {
+		// temp = object.getString("records");
+		// }
+		// JSONArray columns = JSONArray.toJSONArray(temp);
+		JSONArray columns = getColumnByType();
+		nlogger.logout("columns : "+columns);
+		if (columns != null && columns.size() != 0) {
+			int l = columns.size();
+			if (l > 0) {
+				for (int i = 0; i < l; i++) {
+					object = (JSONObject) columns.get(i);
+					Column = object.getString("name");
+					object = (JSONObject) object.get("_id");
+					id = object.getString("$oid");
+					rs.put(id, Column);
+					ogid = id + ",";
+				}
 			}
 		}
 		if (ogid.length() > 0) {
@@ -378,7 +410,7 @@ public class task {
 		dbHelper = new DBHelper("mongodb", "objectList");
 		db db = bind(dbHelper);
 		// 根据ogid,批量查询文章
-		if (ogid != null) {
+		if (ogid != null && !ogid.equals("")) {
 			String[] ids = ogid.split(",");
 			db.or();
 			for (String cid : ids) {
@@ -386,6 +418,50 @@ public class task {
 			}
 			array = db.field("_id,ogid,content,mainName").page(idx, pageSize);
 		}
+		return getColumn(rs, array);
+	}
+
+	/**
+	 * 获取栏目名称
+	 * 
+	 * @project GrapeTask
+	 * @package interfaceApplication
+	 * @file task.java
+	 * 
+	 * @param rs
+	 * @param array
+	 * @return
+	 *
+	 */
+	@SuppressWarnings("unchecked")
+	private JSONArray getColumn(JSONObject rs, JSONArray array) {
+		JSONObject object;
+		String ColumnName = "", ogid;
+		// 获取栏目名称
+		if (rs != null && rs.size() != 0 && array != null && array.size() != 0) {
+			int l = array.size();
+			for (int i = 0; i < l; i++) {
+				object = (JSONObject) array.get(i);
+				ogid = object.getString("ogid");
+				ColumnName = (ogid != null && !ogid.equals("")) ? rs.getString(ogid) : "";
+				object.put("ColumnName", ColumnName);
+				array.set(i, object);
+			}
+		}
+		return array;
+	}
+
+	private JSONArray getColumnByType() {
+		String wbid = (userInfo != null && userInfo.size() != 0) ? userInfo.getString("currentWeb") : "";
+		DBHelper dbHelper = new DBHelper("mongodb", "objectGroup");
+		db db = bind(dbHelper);
+		if (wbid != null && !wbid.equals("")) {
+			db.eq("wbid", wbid);
+		}
+		db.eq("contentType", "5").field("_id,name").limit(50);
+		nlogger.logout("condString: "+db.condString());
+		JSONArray array = db.select();
+		db.clear();
 		return array;
 	}
 }
